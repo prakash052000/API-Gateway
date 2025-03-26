@@ -1,0 +1,63 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway  # Ensure consistent naming
+
+  boot:
+    admin:
+      client:
+        url: http://192.168.1.6:8081  # Spring Boot Admin Server
+        instance:
+          service-base-url: http://192.168.1.6:8080  # Fix duplicate registration
+          prefer-ip: true  # Register using IP instead of hostname
+        metadata:
+          instance-id: ${spring.application.name}:${server.port}  # Force unique instance ID
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/users/**
+          filters:
+            - AddRequestHeader=X-API-GATEWAY, true  # Ensure this header is forwarded
+            - AddRequestHeader=Authorization, Authorization # Forward Authorization header (if set in the request)
+
+        - id: weCoreAPI
+          uri: lb://wecoreapi
+          predicates:
+            - Path=/weCoreAPI/**
+
+  main:
+    web-application-type: reactive
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://192.168.1.6:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+    
+
+  instance:
+    instance-id: ${spring.application.name}:${server.port}  # Force a single unique instance
+    prefer-ip-address: true
+    hostname: 192.168.1.6
+    metadata-map:
+      instanceId: ${spring.application.name}:${server.port}  # Prevent duplicate registration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
