@@ -8,9 +8,9 @@ spring:
   boot:
     admin:
       client:
-        url: http://192.168.1.6:8081  # Spring Boot Admin Server
+        url: http://localhost:8081  # Spring Boot Admin Server
         instance:
-          service-base-url: http://192.168.1.6:8080  # Fix duplicate registration
+          service-base-url: http://localhost:8080  # Fix duplicate registration
           prefer-ip: true  # Register using IP instead of hostname
         metadata:
           instance-id: ${spring.application.name}:${server.port}  # Force unique instance ID
@@ -28,7 +28,7 @@ spring:
             - Path=/users/**
           filters:
             - AddRequestHeader=X-API-GATEWAY, true  # Ensure this header is forwarded
-            - AddRequestHeader=Authorization, Authorization # Forward Authorization header (if set in the request)
+            - AddRequestHeader=Authorization, Bearer ${jwt.token}  # Forward Authorization header (if set in the request)
 
         - id: weCoreAPI
           uri: lb://wecoreapi
@@ -41,7 +41,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://192.168.1.6:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
     
@@ -49,7 +49,7 @@ eureka:
   instance:
     instance-id: ${spring.application.name}:${server.port}  # Force a single unique instance
     prefer-ip-address: true
-    hostname: 192.168.1.6
+    hostname: localhost
     metadata-map:
       instanceId: ${spring.application.name}:${server.port}  # Prevent duplicate registration
 
