@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: api-gateway  # Ensure consistent naming
+    name: API-GATEWAY  # Ensure consistent naming
 
   boot:
     admin:
@@ -13,7 +13,7 @@ spring:
           service-base-url: http://localhost:8080  # Fix duplicate registration
           prefer-ip: true  # Register using IP instead of hostname
         metadata:
-          instance-id: ${spring.application.name}:${server.port}:${random.value}   # Force unique instance ID
+          instance-id: ${spring.application.name}:${server.port}:${random.value}  # Force unique instance ID
 
   cloud:
     gateway:
@@ -23,20 +23,22 @@ spring:
           lower-case-service-id: true
       routes:
         - id: user-service
-          uri: lb://user-service
+          uri: lb://USER-SERVICE  # Ensure USER-SERVICE is correct in Eureka
           predicates:
             - Path=/users/**
-          filters:
-            - AddRequestHeader=X-API-GATEWAY, true  # Ensure this header is forwarded
-            - AddRequestHeader=Authorization, Bearer ${jwt.token}  # Forward Authorization header (if set in the request)
 
         - id: weCoreAPI
-          uri: lb://wecoreapi
+          uri: lb://WECOREAPI  # Ensure WECOREAPI is correct in Eureka
           predicates:
             - Path=/weCoreAPI/**
 
   main:
     web-application-type: reactive
+
+  security:
+    user:
+      name: admin
+      password: admin  # Fix indentation issue
 
 eureka:
   client:
@@ -44,14 +46,13 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
-    
 
   instance:
-    instance-id: ${spring.application.name}:${server.port}:${random.value}   # Force a single unique instance
+    instance-id: ${spring.application.name}:${server.port}:${random.value}  # Force a single unique instance
     prefer-ip-address: false
     hostname: localhost
     metadata-map:
-      instanceId: ${spring.application.name}:${server.port}:${random.value}   # Prevent duplicate registration
+      instanceId: ${spring.application.name}:${server.port}:${random.value}  # Prevent duplicate registration
 
 management:
   endpoints:
