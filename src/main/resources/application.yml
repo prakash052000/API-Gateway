@@ -13,7 +13,7 @@ spring:
           service-base-url: http://localhost:8080  # Fix duplicate registration
           prefer-ip: true  # Register using IP instead of hostname
         metadata:
-          instance-id: ${spring.application.name}:${server.port}  # Force unique instance ID
+          instance-id: ${spring.application.name}:${server.port}:${random.value}   # Force unique instance ID
 
   cloud:
     gateway:
@@ -47,11 +47,11 @@ eureka:
     
 
   instance:
-    instance-id: ${spring.application.name}:${server.port}  # Force a single unique instance
-    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}:${random.value}   # Force a single unique instance
+    prefer-ip-address: false
     hostname: localhost
     metadata-map:
-      instanceId: ${spring.application.name}:${server.port}  # Prevent duplicate registration
+      instanceId: ${spring.application.name}:${server.port}:${random.value}   # Prevent duplicate registration
 
 management:
   endpoints:

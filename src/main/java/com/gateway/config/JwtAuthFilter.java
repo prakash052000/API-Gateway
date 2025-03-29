@@ -1,7 +1,6 @@
 package com.gateway.config;
 
 import java.util.Base64;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -43,6 +41,11 @@ public class JwtAuthFilter implements WebFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        // Bypass actuator endpoints
+        if (exchange.getRequest().getURI().getPath().startsWith("/actuator")) {
+            return chain.filter(exchange);
+        }
+
         ServerHttpRequest request = exchange.getRequest();
 
         if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
