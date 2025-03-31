@@ -5,16 +5,6 @@ spring:
   application:
     name: API-GATEWAY  # Ensure consistent naming
 
-  boot:
-    admin:
-      client:
-        url: http://localhost:8081  # Spring Boot Admin Server
-        instance:
-          service-base-url: http://localhost:8080  # Fix duplicate registration
-          prefer-ip: true  # Register using IP instead of hostname
-        metadata:
-          instance-id: ${spring.application.name}:${server.port}:${random.value}  # Force unique instance ID
-
   cloud:
     gateway:
       discovery:
@@ -23,42 +13,34 @@ spring:
           lower-case-service-id: true
       routes:
         - id: user-service
-          uri: lb://USER-SERVICE  # Ensure USER-SERVICE is correct in Eureka
+          uri: lb://USER-SERVICE
           predicates:
             - Path=/users/**
+            - Path=/users/v3/api-docs 
+          filters:
+            - RewritePath=/users/v3/api-docs, /v3/api-docs  # Remove prefix before forwarding
 
         - id: weCoreAPI
-          uri: lb://WECOREAPI  # Ensure WECOREAPI is correct in Eureka
+          uri: lb://WECOREAPI
           predicates:
-            - Path=/weCoreAPI/**
+            - Path=/weCoreAPI/**, /weCoreAPI/v3/api-docs
+          filters:
+            - RewritePath=/weCoreAPI/v3/api-docs, /v3/api-docs
 
   main:
     web-application-type: reactive
 
-  security:
-    user:
-      name: admin
-      password: admin  # Fix indentation issue
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    config-url: /v3/api-docs/swagger-config
+    urls:
+      - name: User Service
+        url: /users/v3/api-docs
+      - name: WeCore API
+        url: /weCoreAPI/v3/api-docs
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-    register-with-eureka: true
-    fetch-registry: true
-
-  instance:
-    instance-id: ${spring.application.name}:${server.port}:${random.value}  # Force a single unique instance
-    prefer-ip-address: false
-    hostname: localhost
-    metadata-map:
-      instanceId: ${spring.application.name}:${server.port}:${random.value}  # Prevent duplicate registration
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: always
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
