@@ -1,0 +1,52 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: API-GATEWAY
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/users/**,/users/v3/api-docs
+          filters:
+            - RewritePath=/users/v3/api-docs, /v3/api-docs
+
+        - id: weCoreAPI
+          uri: lb://WECOREAPI
+          predicates:
+            - Path=/weCoreAPI/**,/weCoreAPI/v3/api-docs
+          filters:
+            - RewritePath=/weCoreAPI/v3/api-docs, /v3/api-docs
+
+  main:
+    web-application-type: reactive
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    config-url: /v3/api-docs/swagger-config
+    urls:
+      - name: User Service
+        url: /users/v3/api-docs
+      - name: WeCore API
+        url: /weCoreAPI/v3/api-docs
+
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
