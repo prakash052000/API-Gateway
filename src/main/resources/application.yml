@@ -19,12 +19,12 @@ spring:
           filters:
             - RewritePath=/users/v3/api-docs, /v3/api-docs
 
-        - id: weCoreAPI
-          uri: lb://WECOREAPI
+        - id: Orchestration-Service
+          uri: lb://Orchestration-Service 
           predicates:
-            - Path=/weCoreAPI/**,/weCoreAPI/v3/api-docs
+            - Path=/orchestration/**,/orchestration/v3/api-docs
           filters:
-            - RewritePath=/weCoreAPI/v3/api-docs, /v3/api-docs
+            - RewritePath=/orchestration/v3/api-docs, /v3/api-docs
 
   main:
     web-application-type: reactive
