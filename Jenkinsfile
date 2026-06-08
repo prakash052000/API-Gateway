@@ -11,13 +11,13 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t Gateway-api:latest .'
+                bat 'docker build -t gateway-api:latest .'
             }
         }
 
         stage('Run Container') {
             steps {
-                bat 'docker run -d -p 8081:8080 Gateway-api:latest'
+                bat 'docker run -d -p 8081:8080 gateway-api:latest'
             }
         }
     }
