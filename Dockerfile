@@ -12,7 +12,7 @@ WORKDIR /app
 
 COPY --from=build /build/target/*.jar app.jar
 
-EXPOSE 5051 9011
+EXPOSE 5052 9012
 
 ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=60", "-XX:MetaspaceSize=128m", "-XX:MaxMetaspaceSize=1024m", "-XX:MaxDirectMemorySize=650m", "-XX:+ExitOnOutOfMemoryError", "-Xlog:gc*,metaspace", "-Dcom.sun.management.jmxremote", "-Dcom.sun.management.jmxremote.port=9011", "-Dcom.sun.management.jmxremote.rmi.port=9011", "-Dcom.sun.management.jmxremote.authenticate=false", "-Dcom.sun.management.jmxremote.ssl=false", "-Djava.rmi.server.hostname=192.168.1.185", "-jar", "app.jar"]
  
