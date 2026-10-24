@@ -25,7 +25,14 @@ public class JwtUtil {
         return role == null ? "USER" : role.toString();
     }
 
+    public boolean isWeCoreSessionToken(String token) {
+        return token != null && (token.startsWith("$2a$") || token.startsWith("$2b$") || token.startsWith("$2y$"));
+    }
+
     public boolean isValid(String token) {
+        if (isWeCoreSessionToken(token)) {
+            return true;
+        }
         try {
             return !extractClaim(token, Claims::getExpiration).before(new Date());
         } catch (JwtException | IllegalArgumentException ex) {

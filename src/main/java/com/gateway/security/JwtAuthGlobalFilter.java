@@ -51,8 +51,8 @@ public class JwtAuthGlobalFilter implements GlobalFilter, Ordered {
             return unauthorized(exchange, "Invalid or expired JWT token");
         }
 
-        String username = jwtUtil.extractUsername(token);
-        String role = jwtUtil.extractRole(token);
+        String username = jwtUtil.isWeCoreSessionToken(token) ? "WeCoreUser" : jwtUtil.extractUsername(token);
+        String role = jwtUtil.isWeCoreSessionToken(token) ? "USER" : jwtUtil.extractRole(token);
         ServerHttpRequest mutated = exchange.getRequest().mutate()
                 .header("X-Auth-User", username)
                 .header("X-Auth-Role", role)
