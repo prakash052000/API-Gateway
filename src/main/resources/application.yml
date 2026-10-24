@@ -3,31 +3,81 @@ server:
 
 spring:
   application:
-    name: API-GATEWAY
-
+    name: ApiGateway
+  boot:
+    admin:
+      client:
+        url: http://localhost:8081
+        instance:
+          service-base-url: http://localhost:8080
+          prefer-ip: false
+          metadata:
+            unique-name: ApiGateway
+            service-type: gateway
   cloud:
     gateway:
       discovery:
         locator:
-          enabled: true
-          lower-case-service-id: true
+          enabled: false
       routes:
-        - id: user-service
-          uri: lb://user-service
+        - id: AuthService-docs
+          uri: lb://AuthService
           predicates:
-            - Path=/users/**,/users/v3/api-docs
+            - Path=/AuthService/v3/api-docs,/AuthService/v3/api-docs/**
           filters:
-            - RewritePath=/users/v3/api-docs, /v3/api-docs
+            - RewritePath=/AuthService/v3/api-docs(?<rest>.*), /v3/api-docs$\{rest}
 
-        - id: Orchestration-Service
-          uri: lb://Orchestration-Service 
+        - id: AuthService
+          uri: lb://AuthService
           predicates:
-            - Path=/orchestration/**,/orchestration/v3/api-docs
+            - Path=/AuthService/**
           filters:
-            - RewritePath=/orchestration/v3/api-docs, /v3/api-docs
+            - StripPrefix=1
+
+        - id: AuthService-legacy
+          uri: lb://AuthService
+          predicates:
+            - Path=/auth/**,/jwt/**
+
+        - id: OrchestrationService
+          uri: lb://OrchestrationService
+          predicates:
+            - Path=/OrchestrationService/**
+
+        - id: OrchestrationService-legacy
+          uri: lb://OrchestrationService
+          predicates:
+            - Path=/orchestration/**
+          filters:
+            - RewritePath=/orchestration/(?<segment>.*), /OrchestrationService/$\{segment}
+
+        - id: OrchestrationService-demo
+          uri: lb://OrchestrationService
+          predicates:
+            - Path=/Demo/**
+          filters:
+            - RewritePath=/Demo/(?<segment>.*), /OrchestrationService/Demo/$\{segment}
+
+        - id: UserService
+          uri: lb://UserService
+          predicates:
+            - Path=/UserService/**
+          filters:
+            - StripPrefix=1
+
+        - id: UserService-legacy
+          uri: lb://UserService
+          predicates:
+            - Path=/users/**
 
   main:
     web-application-type: reactive
+
+info:
+  app:
+    name: ApiGateway
+    type: gateway
+    port: 8080
 
 eureka:
   client:
@@ -35,6 +85,35 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+    prefer-ip-address: false
+    instance-id: ApiGateway:8080
+    metadata-map:
+      unique-name: ApiGateway
+      service-type: gateway
+      port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+    info:
+      enabled: true
+  info:
+    env:
+      enabled: true
+    java:
+      enabled: true
+    os:
+      enabled: true
+  metrics:
+    tags:
+      application: ApiGateway
 
 springdoc:
   swagger-ui:
@@ -42,11 +121,12 @@ springdoc:
     path: /swagger-ui.html
     config-url: /v3/api-docs/swagger-config
     urls:
-      - name: User Service
-        url: /users/v3/api-docs
-      - name: WeCore API
-        url: /weCoreAPI/v3/api-docs
-
+      - name: AuthService
+        url: /AuthService/v3/api-docs
+      - name: OrchestrationService
+        url: /OrchestrationService/v3/api-docs
+      - name: UserService
+        url: /UserService/v3/api-docs
   api-docs:
     enabled: true
     path: /v3/api-docs
